@@ -1,92 +1,87 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 47 100% 95%;
+    --foreground: 122 67% 24%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 47 100% 99%;
+    --card-foreground: 122 67% 24%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 47 100% 99%;
+    --popover-foreground: 122 67% 24%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 122 50% 33%;
+    --primary-foreground: 47 100% 95%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 16 27% 38%;
+    --secondary-foreground: 47 100% 95%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 47 30% 90%;
+    --muted-foreground: 122 20% 30%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 36 100% 50%;
+    --accent-foreground: 122 67% 24%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 47 100% 95%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 122 20% 85%;
+    --input: 122 20% 85%;
+    --ring: 122 50% 33%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 122 50% 95%;
+    --sidebar-foreground: 122 67% 24%;
+    --sidebar-primary: 122 50% 33%;
+    --sidebar-primary-foreground: 47 100% 95%;
+    --sidebar-accent: 122 20% 90%;
+    --sidebar-accent-foreground: 122 67% 24%;
+    --sidebar-border: 122 20% 85%;
+    --sidebar-ring: 122 50% 33%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 122 30% 10%;
+    --foreground: 47 100% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 122 30% 12%;
+    --card-foreground: 47 100% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 122 30% 12%;
+    --popover-foreground: 47 100% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 122 50% 45%;
+    --primary-foreground: 122 30% 10%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 16 27% 38%;
+    --secondary-foreground: 47 100% 95%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 122 20% 20%;
+    --muted-foreground: 122 10% 70%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 36 100% 50%;
+    --accent-foreground: 122 30% 10%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 47 100% 95%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 122 20% 25%;
+    --input: 122 20% 25%;
+    --ring: 122 50% 45%;
+
+    --sidebar-background: 122 30% 12%;
+    --sidebar-foreground: 47 100% 95%;
+    --sidebar-primary: 122 50% 45%;
+    --sidebar-primary-foreground: 122 30% 10%;
+    --sidebar-accent: 122 20% 20%;
+    --sidebar-accent-foreground: 47 100% 95%;
+    --sidebar-border: 122 20% 25%;
+    --sidebar-ring: 122 50% 45%;
   }
 }
 
@@ -98,4 +93,26 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Agriculture-specific utility classes */
+  .leaf-bullet {
+    list-style-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232E7D32' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 10V4a2 2 0 0 0-2-2h-6v10a2 2 0 0 1-2 2v0'/%3E%3Cpath d='M11 12c-2.2 1-4 2.3-4 3.9C7 17.5 8 18 9 18a3 3 0 0 0 2-1'/%3E%3Cpath d='M11 18v2c0 1-1 2-2 2s-2-1-2-2v-0.5'/%3E%3C/svg%3E");
+  }
+}
+
+/* Animation for growing plant */
+@keyframes grow {
+  0% {
+    transform: scaleY(0.3);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.grow-animation {
+  animation: grow 1.5s ease-out;
+  transform-origin: bottom center;
 }

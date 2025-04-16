@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,29 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Agriculture theme colors
+				agri: {
+					green: {
+						light: '#4CAF50',
+						DEFAULT: '#2E7D32',
+						dark: '#1B5E20',
+					},
+					brown: {
+						light: '#A1887F',
+						DEFAULT: '#795548',
+						dark: '#5D4037',
+					},
+					yellow: {
+						light: '#FFE082',
+						DEFAULT: '#FFC107',
+						dark: '#FFA000',
+					},
+					cream: {
+						light: '#FFFDE7',
+						DEFAULT: '#FFF8E1',
+						dark: '#FFECB3',
+					}
 				}
 			},
 			borderRadius: {
