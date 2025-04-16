@@ -10,6 +10,7 @@ import CropRecommendation from "./pages/CropRecommendation";
 import MarketPrices from "./pages/MarketPrices";
 import Recipes from "./pages/Recipes";
 import TraditionalPractices from "./pages/TraditionalPractices";
+import CommunityForum from "./pages/CommunityForum";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/market-prices" element={<MarketPrices />} />
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/traditional-practices" element={<TraditionalPractices />} />
+          <Route path="/forum" element={<CommunityForum />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
