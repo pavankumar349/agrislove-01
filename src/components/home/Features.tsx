@@ -1,14 +1,14 @@
 
 import React from 'react';
 import FeatureCard from '../common/FeatureCard';
-import { Plant, Droplets, BarChart3, Users, Utensils, BookOpen } from 'lucide-react';
+import { Leaf, Droplets, BarChart3, Users, Utensils, BookOpen } from 'lucide-react';
 
 const Features = () => {
   const features = [
     {
       title: 'Plant Disease Detection',
       description: 'Upload plant images and get instant disease identification with treatment recommendations.',
-      icon: Plant,
+      icon: Leaf,
       path: '/disease-detection',
     },
     {
