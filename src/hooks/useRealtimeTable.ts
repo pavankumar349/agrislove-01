@@ -19,9 +19,8 @@ export function useRealtimeTable<T>(table: TableName, initialQuery: Record<strin
     (async () => {
       setIsLoading(true);
       try {
-        // Use a more aggressive type assertion to bypass TypeScript's strict checking
-        // @ts-ignore - Intentionally using a table name that might not be in the schema
-        const { data, error } = await supabase
+        // Cast the entire supabase instance to any to bypass TypeScript restrictions
+        const { data, error } = await (supabase as any)
           .from(tableName)
           .select("*")
           .order("created_at", { ascending: false });
