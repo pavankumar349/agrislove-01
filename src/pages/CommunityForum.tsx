@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,30 +9,21 @@ import { Separator } from '@/components/ui/separator';
 import { MessageSquare, ThumbsUp, User, Calendar } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
+import { useRealtimeTable } from "@/hooks/useRealtimeTable";
 
 const CommunityForum = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
 
-  const { data: posts, isLoading } = useQuery({
-    queryKey: ['communityPosts', searchTerm, selectedTopic],
-    queryFn: async () => {
-      let query = supabase.from('community_posts').select('*');
-      
-      if (searchTerm) {
-        query = query.or(`title.ilike.%${searchTerm}%,content.ilike.%${searchTerm}%`);
-      }
-      
-      if (selectedTopic) {
-        query = query.eq('topic', selectedTopic);
-      }
-      
-      query = query.order('created_at', { ascending: false });
-      
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
-    },
+  const { rows: allPosts, isLoading } = useRealtimeTable<any>("community_posts", {});
+
+  const posts = allPosts.filter((post) => {
+    const matchesSearch =
+      !searchTerm ||
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTopic = selectedTopic ? post.topic === selectedTopic : true;
+    return matchesSearch && matchesTopic;
   });
 
   const topics = [

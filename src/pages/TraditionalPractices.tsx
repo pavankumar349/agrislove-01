@@ -1,26 +1,35 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card } from '@/components/ui/card';
 import { BookOpen, Calendar, Cloud, Droplets } from 'lucide-react';
+import { useRealtimeTable } from "@/hooks/useRealtimeTable";
 
 const TraditionalPractices = () => {
-  const practices = [
-    {
-      id: 1,
-      title: "Natural Pest Control",
-      description: "Traditional methods using neem leaves and other natural ingredients",
-      category: "Pest Management",
-      season: "All Seasons",
-    },
-    {
-      id: 2,
-      title: "Mixed Cropping",
-      description: "Ancient technique of growing multiple crops in the same field",
-      category: "Farming Method",
-      season: "Based on crops",
-    },
-  ];
+  // Use Real Time Table (for demo, fallback if no table)
+  const { rows: practices, isLoading } = useRealtimeTable<any>(
+    "traditional_practices",
+    {}
+  );
+
+  const displayPractices =
+    practices && practices.length > 0
+      ? practices
+      : [
+          {
+            id: 1,
+            title: "Natural Pest Control",
+            description: "Traditional methods using neem leaves and other natural ingredients",
+            category: "Pest Management",
+            season: "All Seasons",
+          },
+          {
+            id: 2,
+            title: "Mixed Cropping",
+            description: "Ancient technique of growing multiple crops in the same field",
+            category: "Farming Method",
+            season: "Based on crops",
+          },
+        ];
 
   return (
     <Layout>
@@ -28,7 +37,7 @@ const TraditionalPractices = () => {
         <h1 className="text-3xl font-bold text-agri-green-dark mb-8">Traditional Farming Practices</h1>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {practices.map((practice) => (
+          {displayPractices.map((practice) => (
             <Card key={practice.id} className="p-6">
               <div className="w-12 h-12 bg-agri-cream rounded-full flex items-center justify-center mb-4">
                 <BookOpen className="h-6 w-6 text-agri-green" />

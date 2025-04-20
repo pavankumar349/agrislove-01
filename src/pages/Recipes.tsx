@@ -1,30 +1,42 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Utensils } from 'lucide-react';
+import { useRealtimeTable } from "@/hooks/useRealtimeTable";
 
 const Recipes = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
-  
-  const recipes = [
-    {
-      id: 1,
-      title: "Traditional Dal Khichdi",
-      ingredients: ["Rice", "Yellow Dal", "Ghee", "Cumin Seeds"],
-      description: "A nutritious and easy-to-digest Indian dish",
-      cookingTime: "30 mins",
-    },
-    {
-      id: 2,
-      title: "Sarson Ka Saag",
-      ingredients: ["Mustard Greens", "Spinach", "Makki Flour", "Spices"],
-      description: "Popular North Indian winter dish",
-      cookingTime: "45 mins",
-    },
-  ];
+
+  const { rows: recipes, isLoading } = useRealtimeTable<any>(
+    "recipes",
+    {}
+  );
+
+  const displayRecipes =
+    recipes && recipes.length > 0
+      ? recipes.filter((recipe) =>
+          recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : [
+          {
+            id: 1,
+            title: "Traditional Dal Khichdi",
+            ingredients: ["Rice", "Yellow Dal", "Ghee", "Cumin Seeds"],
+            description: "A nutritious and easy-to-digest Indian dish",
+            cookingTime: "30 mins",
+          },
+          {
+            id: 2,
+            title: "Sarson Ka Saag",
+            ingredients: ["Mustard Greens", "Spinach", "Makki Flour", "Spices"],
+            description: "Popular North Indian winter dish",
+            cookingTime: "45 mins",
+          },
+        ].filter((recipe) =>
+          recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
+        );
 
   return (
     <Layout>
@@ -43,7 +55,7 @@ const Recipes = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {recipes.map((recipe) => (
+          {displayRecipes.map((recipe) => (
             <Card key={recipe.id} className="p-6">
               <div className="w-12 h-12 bg-agri-cream rounded-full flex items-center justify-center mb-4">
                 <Utensils className="h-6 w-6 text-agri-green" />
