@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,25 +7,39 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { MessageSquare, ThumbsUp, User, Calendar } from 'lucide-react';
+import { MessageSquare, ThumbsUp, User, Calendar, AlertCircle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import { useRealtimeTable } from "@/hooks/useRealtimeTable";
+import { toast } from '@/components/ui/use-toast';
 
 const CommunityForum = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
 
-  const { rows: allPosts, isLoading } = useRealtimeTable<any>("community_posts", {});
+  const { rows: allPosts, isLoading, error } = useRealtimeTable<any>("community_posts", {});
 
-  const posts = allPosts.filter((post) => {
-    const matchesSearch =
-      !searchTerm ||
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTopic = selectedTopic ? post.topic === selectedTopic : true;
-    return matchesSearch && matchesTopic;
-  });
+  // If there was an error, show a toast message (only once)
+  React.useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error loading forum posts",
+        description: "Could not load community posts. Please try again later.",
+        variant: "destructive",
+      });
+    }
+  }, [error]);
+
+  const posts = React.useMemo(() => {
+    return (allPosts || []).filter((post) => {
+      const matchesSearch =
+        !searchTerm ||
+        post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.content?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesTopic = selectedTopic ? post.topic === selectedTopic : true;
+      return matchesSearch && matchesTopic;
+    });
+  }, [allPosts, searchTerm, selectedTopic]);
 
   const topics = [
     'Organic Farming',
@@ -94,7 +109,17 @@ const CommunityForum = () => {
               
               <TabsContent value="recent" className="space-y-4">
                 {isLoading ? (
-                  <div className="text-center py-8">Loading discussions...</div>
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-agri-green mx-auto mb-4"></div>
+                    <p>Loading discussions...</p>
+                  </div>
+                ) : error ? (
+                  <Card className="p-6 text-center">
+                    <AlertCircle className="h-12 w-12 mx-auto text-red-500 mb-4" />
+                    <h3 className="font-bold text-lg mb-2">Something went wrong</h3>
+                    <p className="text-gray-600 mb-4">We couldn't load the discussions at this time.</p>
+                    <Button onClick={() => window.location.reload()}>Try Again</Button>
+                  </Card>
                 ) : posts && posts.length > 0 ? (
                   posts.map((post) => (
                     <Card key={post.id} className="p-4 hover:shadow-md transition-shadow">

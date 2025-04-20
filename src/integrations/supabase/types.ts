@@ -248,6 +248,60 @@ export type Database = {
         }
         Relationships: []
       }
+      recipes: {
+        Row: {
+          cooking_time: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          ingredients: string[]
+          title: string
+        }
+        Insert: {
+          cooking_time?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          ingredients: string[]
+          title: string
+        }
+        Update: {
+          cooking_time?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          ingredients?: string[]
+          title?: string
+        }
+        Relationships: []
+      }
+      traditional_practices: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string
+          id: string
+          season: string | null
+          title: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          season?: string | null
+          title: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          season?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       user_crop_recommendations: {
         Row: {
           created_at: string | null
