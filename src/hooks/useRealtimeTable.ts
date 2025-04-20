@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
 
 // Define a type that represents all valid table names in our database
-type TableName = keyof Database['public']['Tables'];
+type TableName = keyof Database['public']['Tables'] | string;
 
 // This hook fetches data from a Supabase table and sets up a realtime subscription
 export function useRealtimeTable<T>(table: TableName, initialQuery: Record<string, any> = {}) {
