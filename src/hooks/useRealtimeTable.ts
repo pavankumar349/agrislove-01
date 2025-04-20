@@ -17,8 +17,9 @@ export function useRealtimeTable<T>(table: TableName, initialQuery: Record<strin
     (async () => {
       setIsLoading(true);
       try {
+        // Use a type assertion to handle tables that might not be in the DB type
         const { data, error } = await supabase
-          .from(table)
+          .from(table as string)
           .select("*")
           .order("created_at", { ascending: false });
           
@@ -38,11 +39,12 @@ export function useRealtimeTable<T>(table: TableName, initialQuery: Record<strin
 
   // Subscribe for realtime updates
   useEffect(() => {
+    const tableName = table as string;
     const channel = supabase
-      .channel(`realtime-${table}`)
+      .channel(`realtime-${tableName}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: table as string },
+        { event: "*", schema: "public", table: tableName },
         (payload) => {
           setRows((prev) => {
             if (payload.eventType === "INSERT") {
