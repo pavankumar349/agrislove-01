@@ -3,13 +3,15 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
 
-// Define a type that represents all valid table names in our database
+// Define a type that includes all valid table names in our database
+// plus allows for a string (for tables not yet in the schema)
 type TableName = keyof Database['public']['Tables'] | string;
 
 // This hook fetches data from a Supabase table and sets up a realtime subscription
 export function useRealtimeTable<T>(table: TableName, initialQuery: Record<string, any> = {}) {
   const [rows, setRows] = useState<T[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const tableName = table as string; // Force string type for all usage
 
   // Fetch initial data
   useEffect(() => {
@@ -17,9 +19,9 @@ export function useRealtimeTable<T>(table: TableName, initialQuery: Record<strin
     (async () => {
       setIsLoading(true);
       try {
-        // Use a type assertion to handle tables that might not be in the DB type
+        // Use type assertion for the from method to bypass TypeScript's strict checking
         const { data, error } = await supabase
-          .from(table as string)
+          .from(tableName)
           .select("*")
           .order("created_at", { ascending: false });
           
@@ -35,11 +37,10 @@ export function useRealtimeTable<T>(table: TableName, initialQuery: Record<strin
     return () => {
       isMounted = false;
     };
-  }, [table, ...Object.values(initialQuery || {})]);
+  }, [tableName, ...Object.values(initialQuery || {})]);
 
   // Subscribe for realtime updates
   useEffect(() => {
-    const tableName = table as string;
     const channel = supabase
       .channel(`realtime-${tableName}`)
       .on(
@@ -68,7 +69,7 @@ export function useRealtimeTable<T>(table: TableName, initialQuery: Record<strin
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [table]);
+  }, [tableName]);
 
   return { rows, isLoading, setRows };
 }
