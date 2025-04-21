@@ -11,6 +11,7 @@ import MarketPrices from "./pages/MarketPrices";
 import Recipes from "./pages/Recipes";
 import TraditionalPractices from "./pages/TraditionalPractices";
 import CommunityForum from "./pages/CommunityForum";
+import ChatBot from "./pages/ChatBot";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/traditional-practices" element={<TraditionalPractices />} />
           <Route path="/forum" element={<CommunityForum />} />
+          <Route path="/chatbot" element={<ChatBot />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

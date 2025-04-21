@@ -1,90 +1,104 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Leaf, Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useIsMobile } from '@/hooks/use-mobile';
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { 
+  Sprout, 
+  Menu, 
+  X, 
+  Apple, 
+  ShoppingCart, 
+  BookOpen, 
+  MessageCircle,
+  Bot 
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useMediaQuery } from "@/hooks/use-mobile";
 
-const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const isMobile = useIsMobile();
+const Header: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const location = useLocation();
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  const closeMenu = () => setIsOpen(false);
 
-  const menuItems = [
-    { name: 'Home', path: '/' },
-    { name: 'Disease Detection', path: '/disease-detection' },
-    { name: 'Crop Recommendation', path: '/crop-recommendation' },
-    { name: 'Market Prices', path: '/market-prices' },
-    { name: 'Community Forum', path: '/forum' },
-    { name: 'Recipes', path: '/recipes' },
-    { name: 'Traditional Practices', path: '/traditional-practices' },
+  const routes = [
+    { name: "Home", path: "/" },
+    { name: "Crop Recommendation", path: "/crop-recommendation", icon: Sprout },
+    { name: "Disease Detection", path: "/disease-detection", icon: Apple },
+    { name: "Market Prices", path: "/market-prices", icon: ShoppingCart },
+    { name: "Recipes", path: "/recipes", icon: BookOpen },
+    { name: "Traditional Practices", path: "/traditional-practices", icon: BookOpen },
+    { name: "Community Forum", path: "/forum", icon: MessageCircle },
+    { name: "Chatbot", path: "/chatbot", icon: Bot },
   ];
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link to="/" className="flex items-center gap-2">
-          <Leaf className="h-8 w-8 text-agri-green" />
-          <span className="font-bold text-2xl text-agri-green">Agrislove</span>
-        </Link>
+    <header className="bg-white border-b">
+      <div className="container mx-auto px-4 py-4">
+        <nav className="flex items-center justify-between">
+          <Link to="/" className="flex items-center space-x-2">
+            <Sprout className="h-6 w-6 text-agri-green" />
+            <span className="text-xl font-bold text-agri-green-dark">KrishiMitra</span>
+          </Link>
 
-        {isMobile ? (
-          <>
+          {/* Mobile Menu Button */}
+          {isMobile && (
             <Button
               variant="ghost"
-              size="icon"
-              onClick={toggleMenu}
-              aria-label="Toggle menu"
+              size="sm"
+              onClick={() => setIsOpen(!isOpen)}
+              className="md:hidden"
             >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </Button>
+          )}
 
-            {isMenuOpen && (
-              <div className="absolute top-full left-0 right-0 bg-white shadow-md py-4 px-4 flex flex-col gap-4 z-50">
-                {menuItems.map((item) => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className="text-agri-green-dark hover:text-agri-green font-medium py-2 border-b border-agri-cream"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-                <div className="mt-4 flex gap-4">
-                  <Button asChild variant="outline" className="w-full">
-                    <Link to="/login">Login</Link>
-                  </Button>
-                  <Button asChild className="w-full">
-                    <Link to="/register">Register</Link>
-                  </Button>
-                </div>
-              </div>
-            )}
-          </>
-        ) : (
-          <nav className="flex items-center gap-6">
-            {menuItems.map((item) => (
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex md:items-center md:space-x-4">
+            {routes.slice(1).map((route) => (
               <Link
-                key={item.path}
-                to={item.path}
-                className="text-agri-green-dark hover:text-agri-green font-medium transition-colors"
+                key={route.path}
+                to={route.path}
+                className={cn(
+                  "px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                  location.pathname === route.path
+                    ? "bg-agri-cream text-agri-green-dark"
+                    : "text-gray-600 hover:bg-gray-100"
+                )}
               >
-                {item.name}
+                {route.name}
               </Link>
             ))}
-            <div className="ml-4 flex gap-4">
-              <Button asChild variant="outline">
-                <Link to="/login">Login</Link>
-              </Button>
-              <Button asChild>
-                <Link to="/register">Register</Link>
-              </Button>
+          </div>
+        </nav>
+
+        {/* Mobile Navigation */}
+        {isMobile && isOpen && (
+          <div className="md:hidden mt-4 pb-4">
+            <div className="flex flex-col space-y-2">
+              {routes.map((route) => (
+                <Link
+                  key={route.path}
+                  to={route.path}
+                  className={cn(
+                    "px-4 py-3 flex items-center space-x-2 text-sm font-medium rounded-md transition-colors",
+                    location.pathname === route.path
+                      ? "bg-agri-cream text-agri-green-dark"
+                      : "text-gray-600 hover:bg-gray-100"
+                  )}
+                  onClick={closeMenu}
+                >
+                  {route.icon && <route.icon className="h-5 w-5" />}
+                  <span>{route.name}</span>
+                </Link>
+              ))}
             </div>
-          </nav>
+          </div>
         )}
       </div>
     </header>

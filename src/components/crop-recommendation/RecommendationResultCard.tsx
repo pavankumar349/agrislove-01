@@ -4,7 +4,7 @@ import {
   Tabs, TabsContent, TabsList, TabsTrigger 
 } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Droplets, Sprout } from "lucide-react";
+import { Droplets, Sprout, Flower } from "lucide-react";
 import { CropRecommendation } from "./CropRecommendationForm";
 
 interface Props {
@@ -24,9 +24,10 @@ const RecommendationResultCard: React.FC<Props> = ({ crop }) => (
     </div>
     <Tabs defaultValue="details">
       <div className="border-t px-4 pt-4">
-        <TabsList className="grid grid-cols-2">
+        <TabsList className="grid grid-cols-3">
           <TabsTrigger value="details">Growing Details</TabsTrigger>
           <TabsTrigger value="traditional">Traditional Practices</TabsTrigger>
+          <TabsTrigger value="fertilizer">Fertilizer Guide</TabsTrigger>
         </TabsList>
       </div>
       <TabsContent value="details" className="p-4 pt-2 space-y-4">
@@ -52,6 +53,17 @@ const RecommendationResultCard: React.FC<Props> = ({ crop }) => (
       </TabsContent>
       <TabsContent value="traditional" className="p-4">
         <p className="text-gray-700">{crop.traditionalPractices}</p>
+      </TabsContent>
+      <TabsContent value="fertilizer" className="p-4">
+        <div className="flex items-start">
+          <div className="bg-agri-cream w-8 h-8 rounded-full flex items-center justify-center mr-3 mt-1">
+            <Flower className="w-4 h-4 text-agri-green" />
+          </div>
+          <div>
+            <p className="font-medium text-gray-700">Recommended Fertilizer</p>
+            <p className="text-gray-600 mt-2">{crop.fertilizer || "Balanced NPK fertilizer with appropriate micronutrients based on soil testing."}</p>
+          </div>
+        </div>
       </TabsContent>
     </Tabs>
   </div>
