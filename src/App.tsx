@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +12,7 @@ import Recipes from "./pages/Recipes";
 import TraditionalPractices from "./pages/TraditionalPractices";
 import CommunityForum from "./pages/CommunityForum";
 import ChatBot from "./pages/ChatBot";
+import Weather from "./pages/Weather";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 
@@ -32,6 +34,7 @@ const App = () => (
           <Route path="/traditional-practices" element={<TraditionalPractices />} />
           <Route path="/forum" element={<CommunityForum />} />
           <Route path="/chatbot" element={<ChatBot />} />
+          <Route path="/weather" element={<Weather />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
