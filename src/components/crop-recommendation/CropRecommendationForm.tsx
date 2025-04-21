@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { 
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 export interface CropRecommendation {
   name: string;
@@ -34,47 +35,6 @@ interface Props {
   } | null) => void;
 }
 
-const states = [
-  'Andhra Pradesh', 'Assam', 'Bihar', 'Gujarat', 'Haryana', 
-  'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Punjab', 
-  'Rajasthan', 'Tamil Nadu', 'Telangana', 'Uttar Pradesh', 'West Bengal'
-];
-
-const soilTypes = [
-  'Alluvial Soil', 'Black Soil', 'Red Soil', 'Laterite Soil', 
-  'Desert Soil', 'Mountain Soil', 'Loamy', 'Clay', 'Sandy'
-];
-
-const climates = [
-  'Tropical Wet', 'Tropical Dry', 'Subtropical Humid', 'Semi-Arid', 
-  'Arid', 'Humid Continental', 'Highland'
-];
-
-const seasons = [
-  'Kharif (Monsoon)', 'Rabi (Winter)', 'Zaid (Summer)', 'Year-round'
-];
-
-// Extended crop database with 50+ crops
-const cropDatabase = {
-  "Rice": {
-    waterRequirement: "High",
-    soilTypes: ["Alluvial Soil", "Clay"],
-    climates: ["Tropical Wet", "Subtropical Humid"],
-    seasons: ["Kharif (Monsoon)"],
-    traditionalPractices: "Traditional rice farming involves flooding fields and transplanting seedlings by hand. Farmers often follow lunar calendars for planting times.",
-    fertilizer: "NPK 5:10:10, organic compost, and farmyard manure. Apply nitrogen in split doses."
-  },
-  "Wheat": {
-    waterRequirement: "Medium",
-    soilTypes: ["Loamy", "Clay", "Alluvial Soil"],
-    climates: ["Subtropical Humid", "Semi-Arid", "Humid Continental"],
-    seasons: ["Rabi (Winter)"],
-    traditionalPractices: "Traditional wheat farming includes natural pest control using neem extracts and crop rotation with legumes to maintain soil fertility.",
-    fertilizer: "NPK 12:32:16 at sowing and nitrogen topdressing during tillering stage."
-  },
-  // ... more crops would be here in the actual implementation
-};
-
 const CropRecommendationForm: React.FC<Props> = ({
   onComplete,
   isAnalyzing,
@@ -85,7 +45,141 @@ const CropRecommendationForm: React.FC<Props> = ({
   const [soilType, setSoilType] = useState('');
   const [climate, setClimate] = useState('');
   const [season, setSeason] = useState('');
+  const [states, setStates] = useState<string[]>([]);
+  const [soilTypes, setSoilTypes] = useState<string[]>([]);
+  const [climates, setClimates] = useState<string[]>([]);
+  const [seasons, setSeasons] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  // Fetch options data from Supabase
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        // Fetch states
+        const { data: statesData, error: statesError } = await supabase
+          .from('crop_recommendations')
+          .select('state')
+          .order('state');
+        
+        if (statesError) throw statesError;
+        
+        // Fetch soil types
+        const { data: soilData, error: soilError } = await supabase
+          .from('crop_recommendations')
+          .select('soil_type')
+          .order('soil_type');
+        
+        if (soilError) throw soilError;
+        
+        // Fetch climate zones
+        const { data: climateData, error: climateError } = await supabase
+          .from('crop_recommendations')
+          .select('climate_zone')
+          .order('climate_zone');
+        
+        if (climateError) throw climateError;
+        
+        // Fetch seasons
+        const { data: seasonData, error: seasonError } = await supabase
+          .from('crop_recommendations')
+          .select('season')
+          .order('season');
+        
+        if (seasonError) throw seasonError;
+        
+        // Process and set data, removing duplicates
+        const uniqueStates = [...new Set(statesData.map(item => item.state))];
+        const uniqueSoilTypes = [...new Set(soilData.map(item => item.soil_type))];
+        const uniqueClimates = [...new Set(climateData.map(item => item.climate_zone))];
+        const uniqueSeasons = [...new Set(seasonData.map(item => item.season))];
+        
+        // If we don't have data from Supabase, use defaults
+        setStates(uniqueStates.length > 0 ? uniqueStates : [
+          'Andhra Pradesh', 'Assam', 'Bihar', 'Gujarat', 'Haryana', 
+          'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Punjab', 
+          'Rajasthan', 'Tamil Nadu', 'Telangana', 'Uttar Pradesh', 'West Bengal'
+        ]);
+        
+        setSoilTypes(uniqueSoilTypes.length > 0 ? uniqueSoilTypes : [
+          'Alluvial Soil', 'Black Soil', 'Red Soil', 'Laterite Soil', 
+          'Desert Soil', 'Mountain Soil', 'Loamy', 'Clay', 'Sandy'
+        ]);
+        
+        setClimates(uniqueClimates.length > 0 ? uniqueClimates : [
+          'Tropical Wet', 'Tropical Dry', 'Subtropical Humid', 'Semi-Arid', 
+          'Arid', 'Humid Continental', 'Highland'
+        ]);
+        
+        setSeasons(uniqueSeasons.length > 0 ? uniqueSeasons.map(s => {
+          if (s === 'Kharif') return 'Kharif (Monsoon)';
+          if (s === 'Rabi') return 'Rabi (Winter)';
+          if (s === 'Zaid') return 'Zaid (Summer)';
+          return s;
+        }) : [
+          'Kharif (Monsoon)', 'Rabi (Winter)', 'Zaid (Summer)', 'Year-round'
+        ]);
+        
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching form options:", error);
+        toast({
+          title: "Error loading data",
+          description: "Could not load form options. Using default values.",
+          variant: "destructive",
+        });
+        
+        // Set default values if there's an error
+        setStates([
+          'Andhra Pradesh', 'Assam', 'Bihar', 'Gujarat', 'Haryana', 
+          'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Punjab', 
+          'Rajasthan', 'Tamil Nadu', 'Telangana', 'Uttar Pradesh', 'West Bengal'
+        ]);
+        
+        setSoilTypes([
+          'Alluvial Soil', 'Black Soil', 'Red Soil', 'Laterite Soil', 
+          'Desert Soil', 'Mountain Soil', 'Loamy', 'Clay', 'Sandy'
+        ]);
+        
+        setClimates([
+          'Tropical Wet', 'Tropical Dry', 'Subtropical Humid', 'Semi-Arid', 
+          'Arid', 'Humid Continental', 'Highland'
+        ]);
+        
+        setSeasons([
+          'Kharif (Monsoon)', 'Rabi (Winter)', 'Zaid (Summer)', 'Year-round'
+        ]);
+        
+        setLoading(false);
+      }
+    };
+    
+    fetchOptions();
+    
+    // Set up real-time listener for crop recommendations table
+    const channel = supabase
+      .channel('crop-recommendations-changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'crop_recommendations' 
+        }, 
+        (payload) => {
+          // Refresh options after table changes
+          fetchOptions();
+          toast({
+            title: "Data updated",
+            description: "Crop recommendation database has been updated with new information.",
+          });
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,13 +205,16 @@ const CropRecommendationForm: React.FC<Props> = ({
     }
 
     try {
+      // Parse season to extract just the name part for querying
+      const seasonName = season.split(' ')[0];
+      
       // First try to fetch recommendations from Supabase
       const { data, error } = await supabase
         .from('crop_recommendations')
         .select('*')
         .eq('state', state)
         .eq('soil_type', soilType)
-        .eq('season', season.split(' ')[0])
+        .eq('season', seasonName)
         .eq('climate_zone', climate);
 
       if (error) {
@@ -151,7 +248,7 @@ const CropRecommendationForm: React.FC<Props> = ({
         return;
       }
 
-      // Fallback to local database and expanded mock data if no recommendations found
+      // Fallback to local generation if no recommendations found
       setTimeout(() => {
         const recommendations = generateRecommendations(state, soilType, climate, season);
         onComplete(recommendations);
@@ -372,75 +469,89 @@ const CropRecommendationForm: React.FC<Props> = ({
   };
 
   return (
-    <Card className="p-6 lg:col-span-1">
+    <Card className="p-6 lg:col-span-1 relative">
       <h2 className="text-xl font-bold text-agri-green-dark mb-4">Enter Your Details</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-            <Select onValueChange={setState} value={state}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select your state" />
-              </SelectTrigger>
-              <SelectContent>
-                {states.map((s) => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      {loading ? (
+        <div className="flex items-center justify-center h-60">
+          <div className="flex flex-col items-center">
+            <Loader2 className="h-8 w-8 animate-spin text-agri-green mb-2" />
+            <p className="text-sm text-gray-500">Loading crop data...</p>
           </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Soil Type</label>
-            <Select onValueChange={setSoilType} value={soilType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select soil type" />
-              </SelectTrigger>
-              <SelectContent>
-                {soilTypes.map((s) => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Climate Zone</label>
-            <Select onValueChange={setClimate} value={climate}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select climate" />
-              </SelectTrigger>
-              <SelectContent>
-                {climates.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Growing Season</label>
-            <Select onValueChange={setSeason} value={season}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select season" />
-              </SelectTrigger>
-              <SelectContent>
-                {seasons.map((s) => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <Button 
-            type="submit" 
-            className="w-full mt-2" 
-            disabled={isAnalyzing}
-          >
-            {isAnalyzing ? 'Analyzing...' : 'Get Recommendations'}
-          </Button>
         </div>
-      </form>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+              <Select onValueChange={setState} value={state}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your state" />
+                </SelectTrigger>
+                <SelectContent>
+                  {states.map((s) => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Soil Type</label>
+              <Select onValueChange={setSoilType} value={soilType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select soil type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {soilTypes.map((s) => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Climate Zone</label>
+              <Select onValueChange={setClimate} value={climate}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select climate" />
+                </SelectTrigger>
+                <SelectContent>
+                  {climates.map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Growing Season</label>
+              <Select onValueChange={setSeason} value={season}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select season" />
+                </SelectTrigger>
+                <SelectContent>
+                  {seasons.map((s) => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Button 
+              type="submit" 
+              className="w-full mt-2" 
+              disabled={isAnalyzing}
+            >
+              {isAnalyzing ? (
+                <span className="flex items-center">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Analyzing...
+                </span>
+              ) : 'Get Recommendations'}
+            </Button>
+          </div>
+        </form>
+      )}
       <div className="mt-6">
         <h3 className="font-semibold text-agri-green-dark mb-2">How it works:</h3>
         <ul className="text-gray-600 space-y-1 list-disc pl-5">

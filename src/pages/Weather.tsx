@@ -1,286 +1,224 @@
 
-import React, { useState, useEffect } from 'react';
-import Layout from '@/components/layout/Layout';
+import React, { useState } from "react";
+import Layout from "@/components/layout/Layout";
+import WeatherWidget from "@/components/weather/WeatherWidget";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Cloud, CloudRain, Sun, Wind, Droplets, Calendar, MapPin, Search } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Calendar, CloudRain, Cloud, CloudSun, Sun, AlertCircle, Loader2 } from "lucide-react";
 
-interface WeatherData {
-  state: string;
-  district: string;
-  temperature: number;
-  humidity: number;
-  rainfall: number;
-  forecast: string;
-  forecast_date: string;
-}
+const WeatherPage = () => {
+  const [activeTab, setActiveTab] = useState("current");
 
-const ForecastIcon = ({ forecast }: { forecast: string }) => {
-  const forecastLower = forecast.toLowerCase();
-  
-  if (forecastLower.includes('rain')) return <CloudRain className="h-10 w-10 text-blue-500" />;
-  if (forecastLower.includes('cloud')) return <Cloud className="h-10 w-10 text-gray-500" />;
-  if (forecastLower.includes('sun') || forecastLower.includes('clear')) return <Sun className="h-10 w-10 text-yellow-500" />;
-  return <Cloud className="h-10 w-10 text-gray-400" />;
-};
-
-const Weather = () => {
-  const [location, setLocation] = useState({ state: '', district: '' });
-  const [weatherData, setWeatherData] = useState<WeatherData[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [states, setStates] = useState<string[]>([]);
-  const [districts, setDistricts] = useState<string[]>([]);
-  const { toast } = useToast();
-
-  // Fetch states on component mount
-  useEffect(() => {
-    const fetchStates = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('weather_data')
-          .select('state')
-          .order('state')
-          .limit(50);
-          
-        if (error) throw error;
-        
-        // Extract unique states
-        const uniqueStates = [...new Set(data.map(item => item.state))];
-        setStates(uniqueStates);
-      } catch (error: any) {
-        console.error('Error fetching states:', error);
-      }
-    };
-    
-    fetchStates();
-  }, []);
-
-  // Fetch districts when state changes
-  useEffect(() => {
-    if (!location.state) return;
-    
-    const fetchDistricts = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('weather_data')
-          .select('district')
-          .eq('state', location.state)
-          .order('district');
-          
-        if (error) throw error;
-        
-        // Extract unique districts
-        const uniqueDistricts = [...new Set(data.map(item => item.district))];
-        setDistricts(uniqueDistricts);
-      } catch (error: any) {
-        console.error('Error fetching districts:', error);
-      }
-    };
-    
-    fetchDistricts();
-  }, [location.state]);
-
-  const handleFetchWeather = async () => {
-    if (!location.state) {
-      toast({
-        title: "Please select a state",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-    
-    try {
-      let query = supabase
-        .from('weather_data')
-        .select('*')
-        .eq('state', location.state)
-        .order('forecast_date');
-        
-      if (location.district) {
-        query = query.eq('district', location.district);
-      }
-      
-      const { data, error } = await query;
-      
-      if (error) throw error;
-      
-      if (data && data.length > 0) {
-        setWeatherData(data as WeatherData[]);
-      } else {
-        // Fallback to generate weather data using Gemini if needed
-        await generateWeatherWithGemini();
-      }
-    } catch (error: any) {
-      console.error('Error fetching weather:', error);
-      toast({
-        title: "Error fetching weather data",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const generateWeatherWithGemini = async () => {
-    try {
-      // Invoke edge function to generate weather data
-      const response = await supabase.functions.invoke('generate-weather', {
-        body: { 
-          state: location.state, 
-          district: location.district || 'General'
+  // Fetch weather tips from Supabase
+  const { data: weatherTips, isLoading: tipsLoading } = useQuery({
+    queryKey: ['weatherTips'],
+    queryFn: async () => {
+      // This would ideally fetch from a weather_tips table
+      // For now using mock data as placeholder
+      return [
+        {
+          id: 1,
+          season: "monsoon",
+          tip: "Ensure proper drainage in your fields to prevent waterlogging during heavy rainfall.",
+          crop_types: ["Rice", "Vegetables"]
+        },
+        {
+          id: 2,
+          season: "summer",
+          tip: "Mulch your soil to retain moisture and protect plant roots from extreme heat.",
+          crop_types: ["Vegetables", "Fruits"]
+        },
+        {
+          id: 3,
+          season: "winter",
+          tip: "Cover sensitive crops at night to protect from frost damage during cold waves.",
+          crop_types: ["Vegetables", "Pulses"]
+        },
+        {
+          id: 4,
+          season: "monsoon",
+          tip: "Monitor for increased pest activity during humid conditions and apply appropriate organic remedies.",
+          crop_types: ["All Crops"]
         }
-      });
-
-      if (response.error) throw new Error(response.error.message);
-      
-      // Process and set the generated weather data
-      if (response.data && response.data.weatherData) {
-        setWeatherData(response.data.weatherData);
-      }
-    } catch (error: any) {
-      console.error('Error generating weather data:', error);
-      toast({
-        title: "Failed to generate weather data",
-        description: "Could not fetch or generate weather information. Please try again later.",
-        variant: "destructive",
-      });
+      ];
     }
+  });
+
+  // Get current season based on month
+  const getCurrentSeason = () => {
+    const month = new Date().getMonth();
+    // India's seasons by month (approximate)
+    if (month >= 5 && month <= 8) return "monsoon"; // June to September
+    if (month >= 9 && month <= 10) return "post-monsoon"; // October to November
+    if (month >= 11 || month <= 1) return "winter"; // December to February
+    return "summer"; // March to May
   };
+
+  const currentSeason = getCurrentSeason();
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-agri-green-dark mb-8">Agricultural Weather Forecast</h1>
+        <h1 className="text-3xl font-bold text-agri-green-dark mb-6">Weather Information</h1>
         
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="text-xl">Location Weather</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-                <Select 
-                  value={location.state} 
-                  onValueChange={(value) => setLocation(prev => ({ ...prev, state: value, district: '' }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select state" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {states.map((state) => (
-                      <SelectItem key={state} value={state}>{state}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="mb-4">
+                <TabsTrigger value="current">Current Weather</TabsTrigger>
+                <TabsTrigger value="forecast">5-Day Forecast</TabsTrigger>
+                <TabsTrigger value="seasonal">Seasonal Outlook</TabsTrigger>
+              </TabsList>
               
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">District (Optional)</label>
-                <Select 
-                  value={location.district} 
-                  onValueChange={(value) => setLocation(prev => ({ ...prev, district: value }))}
-                  disabled={!location.state || districts.length === 0}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select district" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {districts.map((district) => (
-                      <SelectItem key={district} value={district}>{district}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <Button 
-              onClick={handleFetchWeather} 
-              disabled={loading || !location.state}
-              className="w-full md:w-auto"
-            >
-              {loading ? "Loading..." : "Get Weather Forecast"}
-            </Button>
-          </CardContent>
-        </Card>
-        
-        {weatherData.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">
-              Weather Forecast for {location.district ? `${location.district}, ` : ''}{location.state}
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {weatherData.map((data, index) => (
-                <Card key={index} className="overflow-hidden">
-                  <CardHeader className="bg-agri-green-dark text-white">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <CardTitle className="text-lg">{new Date(data.forecast_date).toLocaleDateString('en-US', { weekday: 'long' })}</CardTitle>
-                        <p className="text-sm opacity-90">
-                          {new Date(data.forecast_date).toLocaleDateString('en-US', { 
-                            year: 'numeric', 
-                            month: 'short', 
-                            day: 'numeric' 
-                          })}
-                        </p>
-                      </div>
-                      <ForecastIcon forecast={data.forecast || 'cloudy'} />
-                    </div>
+              <TabsContent value="current">
+                <WeatherWidget />
+              </TabsContent>
+              
+              <TabsContent value="forecast">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>5-Day Weather Forecast</CardTitle>
                   </CardHeader>
-                  
-                  <CardContent className="pt-6">
-                    <p className="text-lg font-semibold mb-4">{data.forecast || 'Weather data not available'}</p>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center space-x-2">
-                        <Sun className="h-5 w-5 text-yellow-500" />
-                        <span>{data.temperature}°C</span>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <Droplets className="h-5 w-5 text-blue-500" />
-                        <span>{data.humidity}% Humidity</span>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <CloudRain className="h-5 w-5 text-blue-400" />
-                        <span>{data.rainfall} mm</span>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <MapPin className="h-5 w-5 text-agri-green" />
-                        <span>{data.district}</span>
-                      </div>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                      {Array(5).fill(0).map((_, index) => {
+                        const date = new Date();
+                        date.setDate(date.getDate() + index + 1);
+                        const formattedDate = date.toLocaleDateString('en-IN', { 
+                          weekday: 'short', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        });
+                        
+                        // Just sample weather icons
+                        const icons = [
+                          <Sun key={1} className="h-10 w-10 text-yellow-500" />,
+                          <CloudSun key={2} className="h-10 w-10 text-blue-400" />,
+                          <Cloud key={3} className="h-10 w-10 text-gray-400" />,
+                          <CloudRain key={4} className="h-10 w-10 text-blue-500" />,
+                          <CloudSun key={5} className="h-10 w-10 text-blue-400" />
+                        ];
+                        
+                        const temperatures = [32, 30, 29, 28, 31];
+                        
+                        return (
+                          <div key={index} className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm">
+                            <p className="font-medium text-gray-600">{formattedDate}</p>
+                            <div className="my-3">{icons[index]}</div>
+                            <p className="text-xl font-bold">{temperatures[index]}°C</p>
+                          </div>
+                        );
+                      })}
                     </div>
-                    
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <h4 className="font-semibold mb-2">Agricultural Impact</h4>
-                      {data.forecast.toLowerCase().includes('rain') ? (
-                        <p className="text-sm">Consider postponing outdoor agricultural activities. Good for water-intensive crops.</p>
-                      ) : data.forecast.toLowerCase().includes('cloud') ? (
-                        <p className="text-sm">Moderate conditions for field work. Check soil moisture levels.</p>
-                      ) : (
-                        <p className="text-sm">Good conditions for harvesting. Ensure adequate irrigation for crops.</p>
-                      )}
+                    <div className="mt-6 text-center text-sm text-gray-500">
+                      <p>* This is a forecast preview. For detailed 5-day forecasts with precipitation and wind data, please select a specific district.</p>
                     </div>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
+              </TabsContent>
+              
+              <TabsContent value="seasonal">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Seasonal Weather Outlook</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center mb-6 p-4 bg-agri-cream-light rounded-lg">
+                      <Calendar className="h-8 w-8 text-agri-green-dark mr-3" />
+                      <div>
+                        <h3 className="font-bold text-lg capitalize">Current Season: {currentSeason.replace('-', ' ')}</h3>
+                        <p className="text-gray-600">Seasonal forecasts help plan your farming activities months in advance.</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="p-5 bg-blue-50 rounded-lg">
+                        <h3 className="font-bold mb-2 capitalize">Monsoon (June-September)</h3>
+                        <p className="text-gray-600 mb-2">Expected rainfall: Above normal</p>
+                        <p className="text-gray-600">Good conditions for kharif crops like rice, soybean, and cotton. Prepare for possible flooding in low-lying areas.</p>
+                      </div>
+                      
+                      <div className="p-5 bg-yellow-50 rounded-lg">
+                        <h3 className="font-bold mb-2">Winter (December-February)</h3>
+                        <p className="text-gray-600 mb-2">Expected temperatures: Normal</p>
+                        <p className="text-gray-600">Favorable for rabi crops like wheat, mustard, and gram. Watch for occasional cold waves in northern regions.</p>
+                      </div>
+                      
+                      <div className="p-5 bg-red-50 rounded-lg">
+                        <h3 className="font-bold mb-2">Summer (March-May)</h3>
+                        <p className="text-gray-600 mb-2">Expected temperatures: Above normal</p>
+                        <p className="text-gray-600">Challenging for most crops. Focus on heat-tolerant varieties and efficient irrigation methods.</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
-        )}
+          
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle>Weather Advisory</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {tipsLoading ? (
+                  <div className="flex justify-center items-center p-6">
+                    <Loader2 className="h-6 w-6 animate-spin text-agri-green mr-2" />
+                    <span>Loading advisories...</span>
+                  </div>
+                ) : weatherTips && weatherTips.length > 0 ? (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-agri-green-light rounded-lg">
+                      <h3 className="font-bold text-agri-green-dark mb-2">Current Season Tips</h3>
+                      {weatherTips
+                        .filter(tip => tip.season === currentSeason)
+                        .map(tip => (
+                          <div key={tip.id} className="mb-3 pb-3 border-b border-agri-green-light last:border-0 last:mb-0 last:pb-0">
+                            <p className="text-gray-700">{tip.tip}</p>
+                            <div className="flex flex-wrap mt-1">
+                              {tip.crop_types.map(crop => (
+                                <span key={crop} className="text-xs bg-agri-cream px-2 py-1 rounded-full mr-1 mt-1">
+                                  {crop}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                    
+                    <div>
+                      <h3 className="font-bold mb-2">General Weather Tips</h3>
+                      <ul className="space-y-2 text-gray-700">
+                        {weatherTips
+                          .filter(tip => tip.season !== currentSeason)
+                          .slice(0, 2)
+                          .map(tip => (
+                            <li key={tip.id} className="flex items-start">
+                              <span className="inline-block bg-gray-200 rounded-full p-1 mr-2 mt-1">
+                                <AlertCircle className="h-3 w-3" />
+                              </span>
+                              {tip.tip}
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center p-6">
+                    <AlertCircle className="h-12 w-12 text-orange-500 mx-auto mb-2" />
+                    <p>No weather advisories available.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </Layout>
   );
 };
 
-export default Weather;
+export default WeatherPage;
