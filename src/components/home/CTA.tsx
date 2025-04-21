@@ -10,11 +10,11 @@ const CTA = () => {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Revolutionize Your Farming?</h2>
           <p className="text-lg md:text-xl mb-8 text-agri-cream">
-            Join thousands of Indian farmers who are using Agrislove to improve crop yield, prevent diseases, and increase income.
+            Join thousands of Indian farmers who are using KrishiMitra to improve crop yield, prevent diseases, and increase income.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg" className="bg-agri-yellow text-agri-green-dark hover:bg-agri-yellow-dark">
-              <Link to="/register">Register Now</Link>
+              <Link to="/auth">Get Started</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
               <Link to="/disease-detection">Try Disease Detection</Link>

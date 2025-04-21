@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -17,7 +16,7 @@ const Hero = () => {
             </p>
             <div className="flex flex-wrap gap-4">
               <Button asChild size="lg" className="bg-agri-green hover:bg-agri-green-dark">
-                <Link to="/register">Get Started</Link>
+                <Link to="/auth">Get Started</Link>
               </Button>
               <Button asChild variant="outline" size="lg">
                 <Link to="/disease-detection">Try Disease Detection</Link>
@@ -55,7 +54,6 @@ const Hero = () => {
         </div>
       </div>
       
-      {/* Decorative elements */}
       <div className="absolute -bottom-12 -left-12 w-64 h-64 rounded-full bg-agri-yellow/10"></div>
       <div className="absolute top-12 -right-12 w-32 h-32 rounded-full bg-agri-green/10"></div>
     </div>

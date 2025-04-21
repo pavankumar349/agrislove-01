@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +12,7 @@ import TraditionalPractices from "./pages/TraditionalPractices";
 import CommunityForum from "./pages/CommunityForum";
 import ChatBot from "./pages/ChatBot";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +24,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/disease-detection" element={<DiseaseDetection />} />
           <Route path="/crop-recommendation" element={<CropRecommendation />} />
           <Route path="/market-prices" element={<MarketPrices />} />
