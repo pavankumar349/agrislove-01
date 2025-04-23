@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
@@ -11,7 +10,8 @@ import {
   MessageCircle,
   Bot,
   User,
-  CloudSun
+  CloudSun,
+  Leaf
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -72,6 +72,7 @@ const Header: React.FC = () => {
     { name: "Disease Detection", path: "/disease-detection", icon: Apple },
     { name: "Weather", path: "/weather", icon: CloudSun },
     { name: "Market Prices", path: "/market-prices", icon: ShoppingCart },
+    { name: "Fertilizer Recommendations", path: "/fertilizer-recommendations", icon: Leaf },
     { name: "Recipes", path: "/recipes", icon: BookOpen },
     { name: "Traditional Practices", path: "/traditional-practices", icon: BookOpen },
     { name: "Community Forum", path: "/forum", icon: MessageCircle },

@@ -15,6 +15,7 @@ import ChatBot from "./pages/ChatBot";
 import Weather from "./pages/Weather";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import FertilizerRecommendations from "./pages/FertilizerRecommendations";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/market-prices" element={<MarketPrices />} />
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/traditional-practices" element={<TraditionalPractices />} />
+          <Route path="/fertilizer-recommendations" element={<FertilizerRecommendations />} />
           <Route path="/forum" element={<CommunityForum />} />
           <Route path="/chatbot" element={<ChatBot />} />
           <Route path="/weather" element={<Weather />} />

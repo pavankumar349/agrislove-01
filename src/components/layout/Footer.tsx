@@ -42,7 +42,7 @@ const Footer = () => {
                 <Link to="/market-prices" className="hover:underline">Market Prices</Link>
               </li>
               <li>
-                <Link to="/yield-prediction" className="hover:underline">Yield Prediction</Link>
+                <Link to="/fertilizer-recommendations" className="hover:underline">Fertilizer Recommendations</Link>
               </li>
             </ul>
           </div>
@@ -60,7 +60,7 @@ const Footer = () => {
                 <Link to="/traditional-practices" className="hover:underline">Traditional Practices</Link>
               </li>
               <li>
-                <Link to="/ancient-crops" className="hover:underline">Ancient Crops</Link>
+                <Link to="/weather" className="hover:underline">Weather Forecast</Link>
               </li>
             </ul>
           </div>
