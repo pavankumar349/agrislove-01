@@ -24,8 +24,8 @@ interface MarketPrice {
 }
 
 const MarketPrices = () => {
-  const [selectedState, setSelectedState] = useState('');
-  const [selectedCrop, setSelectedCrop] = useState('');
+  const [selectedState, setSelectedState] = useState<string>('');
+  const [selectedCrop, setSelectedCrop] = useState<string>('');
   const [searchMarket, setSearchMarket] = useState('');
   const [availableStates, setAvailableStates] = useState<string[]>([]);
   const [availableCrops, setAvailableCrops] = useState<string[]>([]);
@@ -40,7 +40,12 @@ const MarketPrices = () => {
         .order('state');
       
       if (error) throw error;
-      return [...new Set(data.map(item => item.state))];
+      // Filter out empty values and undefined values
+      const filteredData = data
+        .filter(item => item && item.state && item.state.trim() !== '')
+        .map(item => item.state);
+      
+      return [...new Set(filteredData)];
     }
   });
 
@@ -54,7 +59,12 @@ const MarketPrices = () => {
         .order('crop_name');
       
       if (error) throw error;
-      return [...new Set(data.map(item => item.crop_name))];
+      // Filter out empty values and undefined values
+      const filteredData = data
+        .filter(item => item && item.crop_name && item.crop_name.trim() !== '')
+        .map(item => item.crop_name);
+      
+      return [...new Set(filteredData)];
     }
   });
 
@@ -98,7 +108,7 @@ const MarketPrices = () => {
           return getMockMarketPrices();
         }
         
-        return data || [];
+        return data as MarketPrice[] || [];
       } catch (error) {
         console.error("Error fetching market prices:", error);
         throw error;
@@ -118,10 +128,13 @@ const MarketPrices = () => {
           table: 'market_prices'
         },
         (payload) => {
-          toast({
-            title: "Market prices updated",
-            description: `Prices for ${payload.new.crop_name} in ${payload.new.market_name} have been updated.`,
-          });
+          const newData = payload.new as MarketPrice;
+          if (newData && newData.crop_name && newData.market_name) {
+            toast({
+              title: "Market prices updated",
+              description: `Prices for ${newData.crop_name} in ${newData.market_name} have been updated.`,
+            });
+          }
           
           refetch();
         }
@@ -220,7 +233,7 @@ const MarketPrices = () => {
                   <SelectValue placeholder="All states" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All states</SelectItem>
+                  <SelectItem value="all-states">All states</SelectItem>
                   {availableStates.map(state => (
                     <SelectItem key={state} value={state}>{state}</SelectItem>
                   ))}
@@ -235,7 +248,7 @@ const MarketPrices = () => {
                   <SelectValue placeholder="All crops" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All crops</SelectItem>
+                  <SelectItem value="all-crops">All crops</SelectItem>
                   {availableCrops.map(crop => (
                     <SelectItem key={crop} value={crop}>{crop}</SelectItem>
                   ))}

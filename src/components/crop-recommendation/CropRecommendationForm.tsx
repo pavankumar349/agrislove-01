@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -89,10 +88,10 @@ const CropRecommendationForm: React.FC<Props> = ({
         if (seasonError) throw seasonError;
         
         // Process and set data, removing duplicates
-        const uniqueStates = [...new Set(statesData.map(item => item.state))];
-        const uniqueSoilTypes = [...new Set(soilData.map(item => item.soil_type))];
-        const uniqueClimates = [...new Set(climateData.map(item => item.climate_zone))];
-        const uniqueSeasons = [...new Set(seasonData.map(item => item.season))];
+        const uniqueStates = [...new Set(statesData.map(item => item.state))].filter(Boolean);
+        const uniqueSoilTypes = [...new Set(soilData.map(item => item.soil_type))].filter(Boolean);
+        const uniqueClimates = [...new Set(climateData.map(item => item.climate_zone))].filter(Boolean);
+        const uniqueSeasons = [...new Set(seasonData.map(item => item.season))].filter(Boolean);
         
         // If we don't have data from Supabase, use defaults
         setStates(uniqueStates.length > 0 ? uniqueStates : [
