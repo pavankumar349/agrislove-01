@@ -7,20 +7,20 @@ import { useRealtimeTable } from "@/hooks/useRealtimeTable";
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-interface Practice {
-  id: string | number;
-  title: string;
-  description: string;
-  category: string;
-  season: string;
-  benefits?: string;
-  regions?: string[];
-}
+const staticPracticesDemo: any[] = Array.from({length: 20}).map((_, idx) => ({
+  id: idx+1,
+  title: "Traditional Practice " + (idx+1),
+  description: `Description for traditional practice ${(idx+1)}.`,
+  category: ["Technique","Irrigation","Pest control","Soil care","Crop"][idx%5],
+  season: ["Winter","Summer","Monsoon","Year-round"][idx%4],
+  benefits: "Sample practice benefits.",
+  regions: ["India"]
+}));
 
 const TraditionalPractices = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPractice, setSelectedPractice] = useState<Practice | null>(null);
-  
+  const [selectedPractice, setSelectedPractice] = useState<any | null>(null);
+
   const { rows: practices, isLoading } = useRealtimeTable<any>(
     "traditional_practices",
     {}
@@ -28,11 +28,11 @@ const TraditionalPractices = () => {
   const [aiCrops, setAiCrops] = React.useState<any[] | null>(null);
 
   React.useEffect(() => {
-    if (!isLoading && practices?.length === 0) {
-      fetch("https://derildzszqbqbgeygznk.functions.supabase.co/generate-traditional-crops")
+    if (!isLoading && (!practices || practices.length === 0)) {
+      fetch("https://derildzszqbqbgeygznk.functions.supabase.co/generate-traditional-practices-large")
         .then((r) => r.json())
-        .then((data) => setAiCrops(Array.isArray(data) ? data : []))
-        .catch(() => setAiCrops([]));
+        .then((data) => setAiCrops(Array.isArray(data) && data.length > 0 ? data : staticPracticesDemo))
+        .catch(() => setAiCrops(staticPracticesDemo));
     }
   }, [isLoading, practices]);
 
@@ -41,42 +41,14 @@ const TraditionalPractices = () => {
       ? practices
       : aiCrops
         ? aiCrops
-        : [
-            {
-              id: 1,
-              title: "Natural Pest Control",
-              description: "Traditional methods using neem leaves and other natural ingredients for pest management without harmful chemicals. Neem leaves contain azadirachtin which repels and disrupts the lifecycle of over 200 species of insects.",
-              category: "Pest Management",
-              season: "All Seasons",
-              benefits: "Environmentally friendly, cost-effective, and promotes beneficial insects",
-              regions: ["North India", "South India", "Central India"]
-            },
-            {
-              id: 2,
-              title: "Mixed Cropping",
-              description: "Ancient technique of growing multiple crops in the same field to maximize land use and natural pest control. This method has been practiced in India for thousands of years and helps maintain soil health through biodiversity.",
-              category: "Farming Method",
-              season: "Based on crops",
-              benefits: "Reduced risk of crop failure, improved soil health, natural pest management",
-              regions: ["All regions of India"]
-            },
-            {
-              id: 3,
-              title: "Water Harvesting Bunds",
-              description: "Traditional water conservation technique using earthen bunds to capture rainwater and prevent soil erosion. This method was widely practiced in ancient India, particularly in arid regions.",
-              category: "Water Conservation",
-              season: "Pre-monsoon",
-              benefits: "Improves groundwater recharge, prevents soil erosion, ensures water availability",
-              regions: ["Rajasthan", "Gujarat", "Maharashtra"]
-            },
-          ];
+        : staticPracticesDemo;
   
   // Filter based on search
   const filteredPractices = searchQuery 
     ? displayPractices.filter(practice => 
-        practice.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        practice.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        practice.description.toLowerCase().includes(searchQuery.toLowerCase())
+        (practice.title?.toLowerCase() ?? "").includes(searchQuery.toLowerCase()) ||
+        (practice.category?.toLowerCase() ?? "").includes(searchQuery.toLowerCase()) ||
+        (practice.description?.toLowerCase() ?? "").includes(searchQuery.toLowerCase())
       )
     : displayPractices;
 
@@ -126,7 +98,6 @@ const TraditionalPractices = () => {
                     </>
                   )}
                 </div>
-                
                 <div>
                   <div className="mb-4">
                     <h3 className="font-bold text-lg mb-2">Category</h3>
@@ -135,7 +106,6 @@ const TraditionalPractices = () => {
                       <span>{selectedPractice.category}</span>
                     </div>
                   </div>
-                  
                   <div className="mb-4">
                     <h3 className="font-bold text-lg mb-2">Best Season</h3>
                     <div className="flex items-center text-gray-700">
@@ -143,12 +113,11 @@ const TraditionalPractices = () => {
                       <span>{selectedPractice.season}</span>
                     </div>
                   </div>
-                  
                   {selectedPractice.regions && (
                     <div>
                       <h3 className="font-bold text-lg mb-2">Regions</h3>
                       <div className="flex flex-wrap gap-2">
-                        {Array.isArray(selectedPractice.regions) ? selectedPractice.regions.map((region, index) => (
+                        {Array.isArray(selectedPractice.regions) ? selectedPractice.regions.map((region: string, index: number) => (
                           <span 
                             key={index}
                             className="px-2 py-1 bg-agri-cream text-agri-green-dark text-sm rounded-full"
@@ -194,7 +163,6 @@ const TraditionalPractices = () => {
                 </div>
               </Card>
             ))}
-            
             {filteredPractices.length === 0 && (
               <div className="col-span-3 text-center py-10">
                 <p>No practices found for "{searchQuery}". Try a different search term.</p>
@@ -206,5 +174,4 @@ const TraditionalPractices = () => {
     </Layout>
   );
 };
-
 export default TraditionalPractices;

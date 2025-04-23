@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card } from '@/components/ui/card';
@@ -5,6 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Utensils } from 'lucide-react';
 import { useRealtimeTable } from "@/hooks/useRealtimeTable";
+
+const staticRecipesDemo: any[] = Array.from({length: 20}).map((_, idx) => ({
+  id: idx+1,
+  title: "Demo Dish " + (idx+1),
+  ingredients: ["Rice", "Dal", "Spices", "Vegetables", "Salt"],
+  description: `Sample recipe description for demo recipe ${(idx+1)}.`,
+  cookingTime: "30 mins",
+}));
 
 const Recipes = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -15,40 +24,26 @@ const Recipes = () => {
     {}
   );
 
+  // Try AI if DB is empty
   React.useEffect(() => {
     if (!isLoading && recipes?.length === 0) {
-      fetch("https://derildzszqbqbgeygznk.functions.supabase.co/generate-recipes")
+      fetch("https://derildzszqbqbgeygznk.functions.supabase.co/generate-recipes-large")
         .then((r) => r.json())
-        .then((data) => setAiRecipes(Array.isArray(data) ? data : []))
-        .catch(() => setAiRecipes([]));
+        .then((data) => setAiRecipes(Array.isArray(data) && data.length > 0 ? data : staticRecipesDemo))
+        .catch(() => setAiRecipes(staticRecipesDemo));
     }
   }, [isLoading, recipes]);
 
   const displayRecipes =
     recipes && recipes.length > 0
       ? recipes.filter((recipe) =>
-          recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
+          recipe.title?.toLowerCase().includes(searchQuery.toLowerCase())
         )
       : aiRecipes
         ? aiRecipes.filter((recipe) =>
             recipe.title?.toLowerCase().includes(searchQuery.toLowerCase())
           )
-        : [
-            {
-              id: 1,
-              title: "Traditional Dal Khichdi",
-              ingredients: ["Rice", "Yellow Dal", "Ghee", "Cumin Seeds"],
-              description: "A nutritious and easy-to-digest Indian dish",
-              cookingTime: "30 mins",
-            },
-            {
-              id: 2,
-              title: "Sarson Ka Saag",
-              ingredients: ["Mustard Greens", "Spinach", "Makki Flour", "Spices"],
-              description: "Popular North Indian winter dish",
-              cookingTime: "45 mins",
-            },
-          ].filter((recipe) =>
+        : staticRecipesDemo.filter((recipe) =>
             recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
           );
 
@@ -77,7 +72,7 @@ const Recipes = () => {
               <h3 className="font-bold text-lg mb-2">{recipe.title}</h3>
               <p className="text-gray-600 mb-4">{recipe.description}</p>
               <div className="text-sm text-gray-500">
-                <p>Cooking time: {recipe.cookingTime}</p>
+                <p>Cooking time: {recipe.cookingTime ?? recipe.cooking_time}</p>
                 <p className="mt-2">Main ingredients:</p>
                 <ul className="list-disc list-inside mt-1">
                   {recipe.ingredients &&
@@ -94,5 +89,4 @@ const Recipes = () => {
     </Layout>
   );
 };
-
 export default Recipes;

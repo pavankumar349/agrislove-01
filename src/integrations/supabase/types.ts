@@ -167,6 +167,39 @@ export type Database = {
         }
         Relationships: []
       }
+      fertilizer_recommendations: {
+        Row: {
+          application_timing: string
+          chemical_fertilizers: string[]
+          created_at: string | null
+          crop_name: string
+          dosage_per_acre: string
+          id: string
+          organic_fertilizers: string[]
+          special_notes: string | null
+        }
+        Insert: {
+          application_timing: string
+          chemical_fertilizers?: string[]
+          created_at?: string | null
+          crop_name: string
+          dosage_per_acre: string
+          id?: string
+          organic_fertilizers?: string[]
+          special_notes?: string | null
+        }
+        Update: {
+          application_timing?: string
+          chemical_fertilizers?: string[]
+          created_at?: string | null
+          crop_name?: string
+          dosage_per_acre?: string
+          id?: string
+          organic_fertilizers?: string[]
+          special_notes?: string | null
+        }
+        Relationships: []
+      }
       market_prices: {
         Row: {
           crop_name: string
