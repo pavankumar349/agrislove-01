@@ -5,31 +5,42 @@ import { BookOpen, Calendar, Cloud, Droplets } from 'lucide-react';
 import { useRealtimeTable } from "@/hooks/useRealtimeTable";
 
 const TraditionalPractices = () => {
-  // Use Real Time Table (for demo, fallback if no table)
   const { rows: practices, isLoading } = useRealtimeTable<any>(
     "traditional_practices",
     {}
   );
+  const [aiCrops, setAiCrops] = React.useState<any[] | null>(null);
+
+  React.useEffect(() => {
+    if (!isLoading && practices?.length === 0) {
+      fetch("https://derildzszqbqbgeygznk.functions.supabase.co/generate-traditional-crops")
+        .then((r) => r.json())
+        .then((data) => setAiCrops(Array.isArray(data) ? data : []))
+        .catch(() => setAiCrops([]));
+    }
+  }, [isLoading, practices]);
 
   const displayPractices =
     practices && practices.length > 0
       ? practices
-      : [
-          {
-            id: 1,
-            title: "Natural Pest Control",
-            description: "Traditional methods using neem leaves and other natural ingredients",
-            category: "Pest Management",
-            season: "All Seasons",
-          },
-          {
-            id: 2,
-            title: "Mixed Cropping",
-            description: "Ancient technique of growing multiple crops in the same field",
-            category: "Farming Method",
-            season: "Based on crops",
-          },
-        ];
+      : aiCrops
+        ? aiCrops
+        : [
+            {
+              id: 1,
+              title: "Natural Pest Control",
+              description: "Traditional methods using neem leaves and other natural ingredients",
+              category: "Pest Management",
+              season: "All Seasons",
+            },
+            {
+              id: 2,
+              title: "Mixed Cropping",
+              description: "Ancient technique of growing multiple crops in the same field",
+              category: "Farming Method",
+              season: "Based on crops",
+            },
+          ];
 
   return (
     <Layout>

@@ -8,35 +8,49 @@ import { useRealtimeTable } from "@/hooks/useRealtimeTable";
 
 const Recipes = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [aiRecipes, setAiRecipes] = React.useState<any[] | null>(null);
 
   const { rows: recipes, isLoading } = useRealtimeTable<any>(
     "recipes",
     {}
   );
 
+  React.useEffect(() => {
+    if (!isLoading && recipes?.length === 0) {
+      fetch("https://derildzszqbqbgeygznk.functions.supabase.co/generate-recipes")
+        .then((r) => r.json())
+        .then((data) => setAiRecipes(Array.isArray(data) ? data : []))
+        .catch(() => setAiRecipes([]));
+    }
+  }, [isLoading, recipes]);
+
   const displayRecipes =
     recipes && recipes.length > 0
       ? recipes.filter((recipe) =>
           recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
         )
-      : [
-          {
-            id: 1,
-            title: "Traditional Dal Khichdi",
-            ingredients: ["Rice", "Yellow Dal", "Ghee", "Cumin Seeds"],
-            description: "A nutritious and easy-to-digest Indian dish",
-            cookingTime: "30 mins",
-          },
-          {
-            id: 2,
-            title: "Sarson Ka Saag",
-            ingredients: ["Mustard Greens", "Spinach", "Makki Flour", "Spices"],
-            description: "Popular North Indian winter dish",
-            cookingTime: "45 mins",
-          },
-        ].filter((recipe) =>
-          recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+      : aiRecipes
+        ? aiRecipes.filter((recipe) =>
+            recipe.title?.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        : [
+            {
+              id: 1,
+              title: "Traditional Dal Khichdi",
+              ingredients: ["Rice", "Yellow Dal", "Ghee", "Cumin Seeds"],
+              description: "A nutritious and easy-to-digest Indian dish",
+              cookingTime: "30 mins",
+            },
+            {
+              id: 2,
+              title: "Sarson Ka Saag",
+              ingredients: ["Mustard Greens", "Spinach", "Makki Flour", "Spices"],
+              description: "Popular North Indian winter dish",
+              cookingTime: "45 mins",
+            },
+          ].filter((recipe) =>
+            recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
+          );
 
   return (
     <Layout>
@@ -66,9 +80,10 @@ const Recipes = () => {
                 <p>Cooking time: {recipe.cookingTime}</p>
                 <p className="mt-2">Main ingredients:</p>
                 <ul className="list-disc list-inside mt-1">
-                  {recipe.ingredients.map((ingredient, index) => (
-                    <li key={index}>{ingredient}</li>
-                  ))}
+                  {recipe.ingredients &&
+                    recipe.ingredients.map((ingredient: string, index: number) => (
+                      <li key={index}>{ingredient}</li>
+                    ))}
                 </ul>
               </div>
               <Button className="w-full mt-4">View Recipe</Button>
